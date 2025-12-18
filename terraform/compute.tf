@@ -1,3 +1,6 @@
+locals {
+  vm_count = 1
+}
 # Generate SSH key pair
 resource "tls_private_key" "ssh" {
   algorithm = "RSA"
@@ -14,7 +17,8 @@ data "azurerm_platform_image" "rhel9" {
 
 # Public IP for the VM
 resource "azurerm_public_ip" "vm" {
-  name                = "pip-vm-rhel9"
+  count               = local.vm_count
+  name                = "pip-vm-rhel9-${count.index}"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   allocation_method   = "Static"
@@ -54,7 +58,8 @@ resource "azurerm_network_security_group" "vm" {
 
 # Network Interface
 resource "azurerm_network_interface" "vm" {
-  name                = "nic-vm-rhel9"
+  count               = local.vm_count
+  name                = "nic-vm-rhel9-${count.index}"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
 
@@ -62,19 +67,20 @@ resource "azurerm_network_interface" "vm" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.public.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.vm.id
+    public_ip_address_id          = azurerm_public_ip.vm[count.index].id
   }
 }
 
 # Associate NSG with Network Interface
 resource "azurerm_network_interface_security_group_association" "vm" {
-  network_interface_id      = azurerm_network_interface.vm.id
+  count                     = local.vm_count
+  network_interface_id      = azurerm_network_interface.vm[count.index].id
   network_security_group_id = azurerm_network_security_group.vm.id
 }
 
 # Linux Virtual Machine
 resource "azurerm_linux_virtual_machine" "rhel9" {
-  count               = 1
+  count               = local.vm_count
   name                = "vm-rhel9-${count.index}"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
@@ -82,7 +88,7 @@ resource "azurerm_linux_virtual_machine" "rhel9" {
   admin_username      = "azureuser"
 
   network_interface_ids = [
-    azurerm_network_interface.vm.id,
+    azurerm_network_interface.vm[count.index].id,
   ]
 
   admin_ssh_key {

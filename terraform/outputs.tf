@@ -10,7 +10,7 @@ output "vm_name" {
 
 output "vm_public_ip" {
   description = "Public IP address of the RHEL 9 VM"
-  value       = "http://${azurerm_public_ip.vm.ip_address}"
+  value       = [for ip in azurerm_public_ip.vm : "http://${ip.ip_address}"]
 }
 
 output "vm_private_ip" {
