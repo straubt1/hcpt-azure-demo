@@ -1,5 +1,5 @@
 locals {
-  vm_count = 1
+  vm_count = 2
 }
 # Generate SSH key pair
 resource "tls_private_key" "ssh" {
