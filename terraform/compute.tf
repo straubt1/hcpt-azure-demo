@@ -138,9 +138,7 @@ resource "azurerm_linux_virtual_machine" "rhel9" {
     <body>
         <div class="container">
             <h1>Welcome to RHEL 9 on Azure!</h1>
-            <p>This web server was automatically configured using cloud-init.</p>
-            <p>Hostname: $(hostname)</p>
-            <p>Date: $(date)</p>
+            <p>This web server was automatically created and configured using Terraform!</p>
         </div>
     </body>
     </html>
