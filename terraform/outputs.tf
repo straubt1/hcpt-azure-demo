@@ -10,12 +10,12 @@ output "vm_public_ip" {
 
 output "vm_name" {
   description = "Name of the RHEL 9 VM"
-  value       = azurerm_linux_virtual_machine.rhel9.name
+  value       = azurerm_linux_virtual_machine.rhel9.*.name
 }
 
 output "vm_private_ip" {
   description = "Private IP address of the RHEL 9 VM"
-  value       = azurerm_linux_virtual_machine.rhel9.private_ip_address
+  value       = azurerm_linux_virtual_machine.rhel9.*.private_ip_address
 }
 
 output "ssh_private_key" {
