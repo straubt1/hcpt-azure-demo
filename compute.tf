@@ -19,7 +19,7 @@ data "azurerm_platform_image" "rhel9" {
 # Public IP for the VM
 resource "azurerm_public_ip" "vm" {
   count               = local.vm_count
-  name                = "pip-vm-rhel9-${count.index}"
+  name                = "pip-vm-rhel9-${counts.index}"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   allocation_method   = "Static"
