@@ -1,6 +1,7 @@
 locals {
   vm_count = 1
 }
+
 # Generate SSH key pair
 resource "tls_private_key" "ssh" {
   algorithm = "RSA"
@@ -23,37 +24,6 @@ resource "azurerm_public_ip" "vm" {
   resource_group_name = azurerm_resource_group.main.name
   allocation_method   = "Static"
   sku                 = "Standard"
-}
-
-# Network Security Group
-resource "azurerm_network_security_group" "vm" {
-  name                = "nsg-vm-rhel9"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
-  security_rule {
-    name                       = "AllowHTTP"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "80"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "AllowSSH"
-    priority                   = 110
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "22"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
 }
 
 # Network Interface
@@ -108,55 +78,26 @@ resource "azurerm_linux_virtual_machine" "rhel9" {
     version   = "latest"
   }
 
+  custom_data = base64encode(file("${path.module}/scripts/cloud-init.sh"))
+
   # lifecycle {
   #   action_trigger {
   #     events  = [after_create]
   #     actions = [action.aap_job_launch.test]
   #   }
   # }
-
-  custom_data = base64encode(<<-EOF
-    #!/bin/bash
-    # Install Apache web server
-    dnf install -y httpd
-    
-    # Create a simple HTML page
-    cat > /var/www/html/index.html <<'HTML'
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>RHEL 9 VM on Azure</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 50px;
-                background-color: #f0f0f0;
-            }
-            .container {
-                background-color: white;
-                padding: 30px;
-                border-radius: 10px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-            h1 { color: #0078D4; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>Welcome to RHEL 9 on Azure!</h1>
-            <p>This web server was automatically created and configured using Terraform!</p>
-        </div>
-    </body>
-    </html>
-    HTML
-    
-    # Start and enable Apache
-    systemctl start httpd
-    systemctl enable httpd
-    
-    # Open firewall for HTTP
-    firewall-cmd --permanent --add-service=http
-    firewall-cmd --reload
-  EOF
-  )
 }
+
+
+# provider "aap" {
+#   host  = "https://myaap.example.com"
+#   token = "aap-token"
+# }
+
+# # Define an action to send a payload to AAP API.
+# action "aap_job_launch" "test" {
+#   config {
+#     job_template_id     = 1234
+#     wait_for_completion = true
+#   }
+# }
