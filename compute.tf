@@ -1,5 +1,5 @@
 locals {
-  vm_count = 2
+  vm_count = 3
 }
 
 # Generate SSH key pair
