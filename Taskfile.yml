@@ -1,0 +1,38 @@
+version: '3'
+
+dotenv: ['.env', 'secrets/.env']
+
+vars:
+  ORGANIZATION: terraform-tom
+  WORKSPACE: azure-eastus2-demo
+tasks:
+  az:login:
+    desc: Log into Azure Tenant
+    cmds:
+      - doormat login
+      - az login --tenant ${ARM_TENANT_ID}
+  az:create-spn:
+    cmds:
+      - |
+        az ad sp create-for-rbac -n "{{.WORKSPACE}}" \
+        --role="Contributor" \
+        --scopes="/subscriptions/${ARM_SUBSCRIPTION_ID}"
+  hcpt:ws:creds:
+    cmds:
+      - |
+        tfx ws var create -w {{.WORKSPACE}} \
+          -e --sensitive \
+          -k ARM_TENANT_ID \
+          -v ${ARM_TENANT_ID}
+        tfx ws var create -w {{.WORKSPACE}} \
+          -e --sensitive \
+          -k ARM_SUBSCRIPTION_ID \
+          -v ${ARM_SUBSCRIPTION_ID}
+        tfx ws var create -w {{.WORKSPACE}} \
+          -e --sensitive \
+          -k ARM_CLIENT_ID \
+          -v ${ARM_CLIENT_ID}
+        tfx ws var create -w {{.WORKSPACE}} \
+          -e --sensitive \
+          -k ARM_CLIENT_SECRET \
+          -v ${ARM_CLIENT_SECRET}
