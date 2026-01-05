@@ -80,9 +80,13 @@ resource "azurerm_linux_virtual_machine" "rhel9" {
 
   custom_data = base64encode(file("${path.module}/scripts/cloud-init.sh"))
 
+  tags = {
+    ts = timestamp() #always update tag
+  }
+
   lifecycle {
     action_trigger {
-      events  = [after_create]
+      events  = [after_create, after_update]
       actions = [action.aap_job_launch.test]
     }
   }
@@ -97,7 +101,7 @@ provider "aap" {
 # Define an action to send a payload to AAP API.
 action "aap_job_launch" "test" {
   config {
-    job_template_id     = 1
+    job_template_id     = 7
     wait_for_completion = true
   }
 }
