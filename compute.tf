@@ -1,5 +1,5 @@
 locals {
-  vm_count = 3
+  vm_count = 1
 }
 
 # Generate SSH key pair
@@ -80,24 +80,24 @@ resource "azurerm_linux_virtual_machine" "rhel9" {
 
   custom_data = base64encode(file("${path.module}/scripts/cloud-init.sh"))
 
-  # lifecycle {
-  #   action_trigger {
-  #     events  = [after_create]
-  #     actions = [action.aap_job_launch.test]
-  #   }
-  # }
+  lifecycle {
+    action_trigger {
+      events  = [after_create]
+      actions = [action.aap_job_launch.test]
+    }
+  }
 }
 
 
-# provider "aap" {
-#   host  = "https://myaap.example.com"
-#   token = "aap-token"
-# }
+provider "aap" {
+  host = "https://aap-aap.apps.cluster-nhglp-1.dynamic.redhatworkshops.io"
+  # token = "aap-token" Set via environment variable AAP_TOKEN
+}
 
-# # Define an action to send a payload to AAP API.
-# action "aap_job_launch" "test" {
-#   config {
-#     job_template_id     = 1234
-#     wait_for_completion = true
-#   }
-# }
+# Define an action to send a payload to AAP API.
+action "aap_job_launch" "test" {
+  config {
+    job_template_id     = 1
+    wait_for_completion = true
+  }
+}
